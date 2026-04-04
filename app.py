@@ -261,9 +261,6 @@ def get_stations():
     return jsonify({'stations': stations})
 
 if __name__ == '__main__':
-    if not os.path.exists(DB_PATH):
-        init_db()
-    else:
-        # Re-init to ensure schema and seed data
-        init_db()
-    app.run(debug=True, port=5000)
+    init_db()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
