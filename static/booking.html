@@ -1,383 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Book Ticket — RailYatra</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #e2e8f0; }
-    h1,h2,h3,.font-display { font-family: 'Syne', sans-serif; }
-    .card-glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px); }
-    .input-field { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e2e8f0; transition: all 0.2s; width: 100%; }
-    .input-field:focus { outline: none; border-color: #f97316; background: rgba(249,115,22,0.08); box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
-    .input-field::placeholder { color: rgba(255,255,255,0.3); }
-    .btn-primary { background: linear-gradient(135deg, #ea580c, #f97316); transition: all 0.2s; box-shadow: 0 4px 20px rgba(249,115,22,0.3); }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(249,115,22,0.45); }
-    .nav-link { transition: color 0.2s; }
-    .nav-link:hover { color: #f97316; }
-    .loader { width: 32px; height: 32px; border: 3px solid rgba(249,115,22,0.2); border-top-color: #f97316; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
-    .fade-up { animation: fadeUp 0.4s ease forwards; }
-    .ticket-bg {
-      background: linear-gradient(135deg, #0f2040, #1a3560);
-      border: 1px solid rgba(249,115,22,0.3);
-      position: relative;
+    :root { --navy:#1a2744; --blue:#2563eb; --accent:#f59e0b; --light:#f8f9fc; --border:#e2e8f0; --text:#1e293b; --muted:#64748b; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Mulish',sans-serif; background:var(--light); color:var(--text); }
+    .font-display { font-family:'Playfair Display',serif; }
+    nav { background:var(--navy); }
+    .nav-link { color:rgba(255,255,255,0.7); transition:color 0.2s; font-size:14px; text-decoration:none; }
+    .nav-link:hover,.nav-link.active { color:var(--accent); }
+    .card { background:white; border:1.5px solid var(--border); border-radius:14px; }
+    label { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:6px; }
+    .field { width:100%; border:1.5px solid var(--border); border-radius:10px; padding:11px 14px; font-family:'Mulish',sans-serif; font-size:14px; color:var(--text); background:#fafbfc; transition:all 0.2s; outline:none; appearance:auto; }
+    .field:focus { border-color:var(--blue); background:white; box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+    .field::placeholder { color:#aab4c4; }
+    .btn-confirm { background:var(--blue); color:white; border:none; border-radius:10px; padding:14px; font-family:'Mulish',sans-serif; font-weight:700; font-size:15px; cursor:pointer; width:100%; transition:all 0.2s; }
+    .btn-confirm:hover { background:#1d4ed8; transform:translateY(-1px); box-shadow:0 4px 20px rgba(37,99,235,0.3); }
+    .btn-confirm:disabled { background:#94a3b8; cursor:not-allowed; transform:none; }
+    .tab { padding:12px 24px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid transparent; color:var(--muted); transition:all 0.2s; background:none; border-top:none; border-left:none; border-right:none; font-family:'Mulish',sans-serif; }
+    .tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+    .tab:hover { color:var(--text); }
+    .loader { width:20px; height:20px; border:2px solid rgba(255,255,255,0.4); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; vertical-align:middle; margin-right:8px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation:fadeUp 0.35s ease forwards; }
+
+    /* Ticket */
+    .ticket {
+      background: white;
+      border-radius: 16px;
       overflow: hidden;
+      box-shadow: 0 20px 60px rgba(26,39,68,0.18);
+      max-width: 480px;
+      width: 100%;
     }
-    .ticket-bg::before {
-      content: '🚆';
-      position: absolute;
-      font-size: 120px;
-      right: -10px;
-      bottom: -20px;
-      opacity: 0.06;
-    }
-    .tab-active { border-bottom: 2px solid #f97316; color: #f97316; }
-    .tab-inactive { border-bottom: 2px solid transparent; color: #94a3b8; }
+    .ticket-header { background:var(--navy); padding:24px 28px; }
+    .ticket-body { padding:24px 28px; }
+    .ticket-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+    .ticket-row:last-child { border-bottom:none; }
+    .ticket-label { font-size:12px; color:var(--muted); font-weight:600; }
+    .ticket-value { font-size:14px; font-weight:700; color:var(--navy); }
+    .pnr-badge { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--accent); letter-spacing:2px; }
+
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.6); display:flex; align-items:center; justify-content:center; padding:24px; z-index:100; backdrop-filter:blur(4px); }
+
+    .section-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); padding:16px 20px 8px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:0 20px 20px; }
+    .form-full { grid-column: 1 / -1; }
+    .error-box { background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:10px 14px; color:#dc2626; font-size:13px; margin:0 20px 16px; }
+
+    .pnr-input-wrap { display:flex; gap:10px; padding:0 20px 20px; }
   </style>
 </head>
-<body class="min-h-screen" style="background: radial-gradient(ellipse at 30% 0%, #1a3a6e33 0%, transparent 55%), #0a0f1e;">
-
-  <nav class="border-b border-white/5 sticky top-0 z-50" style="background:rgba(10,15,30,0.85);backdrop-filter:blur(20px)">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3">
-        <span class="text-2xl">🚆</span>
-        <span class="font-display font-800 text-xl tracking-tight">Rail<span class="text-orange-400">Yatra</span></span>
+<body>
+  <nav>
+    <div style="max-width:1100px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;">
+      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <span style="font-size:22px;">🚆</span>
+        <span class="font-display" style="color:white;font-size:20px;font-weight:700;">Rail<span style="color:var(--accent)">Yatra</span></span>
       </a>
-      <div class="flex items-center gap-8 text-sm text-slate-400">
-        <a href="/" class="nav-link">Search Trains</a>
-        <a href="/seat-availability" class="nav-link">Seat Availability</a>
-        <a href="/booking" class="nav-link text-orange-400 font-medium">My Booking</a>
+      <div style="display:flex;gap:28px;align-items:center;">
+        <a href="/" class="nav-link">Search</a>
+        <a href="/seat-availability" class="nav-link">Seat Map</a>
+        <a href="/booking" class="nav-link active">Booking</a>
+        <a href="/booking" style="background:var(--accent);color:var(--navy);padding:7px 18px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">Check PNR</a>
       </div>
     </div>
   </nav>
 
-  <div class="max-w-3xl mx-auto px-6 pt-12 pb-16">
-    <h1 class="font-display text-4xl font-extrabold mb-2">Book <span class="text-orange-400">Ticket</span></h1>
-    <p class="text-slate-400 mb-8">Fill in passenger details to confirm your booking.</p>
+  <!-- Page Header -->
+  <div style="background:var(--navy);padding:32px 24px;">
+    <div style="max-width:700px;margin:0 auto;">
+      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:6px;"><a href="/" style="color:rgba(255,255,255,0.4);text-decoration:none;">← Back to Search</a></p>
+      <h1 class="font-display" style="color:white;font-size:32px;">Ticket Booking</h1>
+      <p style="color:rgba(255,255,255,0.45);font-size:14px;margin-top:6px;">Fill passenger details to confirm your reservation</p>
+    </div>
+  </div>
+
+  <div style="max-width:700px;margin:0 auto;padding:32px 24px 60px;">
 
     <!-- Tabs -->
-    <div class="flex gap-0 mb-8 border-b border-white/10">
-      <button onclick="showTab('book')" id="tab-book" class="px-6 py-3 text-sm font-semibold transition-all tab-active">Book Ticket</button>
-      <button onclick="showTab('pnr')" id="tab-pnr" class="px-6 py-3 text-sm font-semibold transition-all tab-inactive">Check PNR</button>
+    <div style="display:flex;border-bottom:1.5px solid var(--border);margin-bottom:24px;">
+      <button class="tab active" id="tab-book" onclick="showTab('book')">Book Ticket</button>
+      <button class="tab" id="tab-pnr" onclick="showTab('pnr')">Check PNR Status</button>
     </div>
 
-    <!-- BOOK TICKET TAB -->
+    <!-- BOOK TAB -->
     <div id="pane-book">
-      <!-- Train Info Card -->
-      <div id="train-info-card" class="hidden card-glass rounded-2xl p-5 mb-6 fade-up">
-        <div class="flex flex-wrap gap-4 items-center justify-between">
+
+      <!-- Selected Train Info -->
+      <div id="train-banner" style="display:none;background:var(--navy);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:none;" class="fade-up">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
           <div>
-            <p id="card-train-name" class="font-display font-bold text-lg text-white"></p>
-            <p id="card-route" class="text-slate-400 text-sm mt-1"></p>
+            <p id="banner-name" style="color:white;font-weight:700;font-size:15px;"></p>
+            <p id="banner-route" style="color:rgba(255,255,255,0.45);font-size:13px;margin-top:3px;"></p>
           </div>
-          <div class="flex gap-6 text-center">
-            <div>
-              <p id="card-depart" class="font-display font-bold text-xl text-orange-400"></p>
-              <p class="text-xs text-slate-500">Departure</p>
-            </div>
-            <div>
-              <p id="card-arrive" class="font-display font-bold text-xl text-orange-300"></p>
-              <p class="text-xs text-slate-500">Arrival</p>
-            </div>
-            <div>
-              <p id="card-fare" class="font-display font-bold text-xl text-green-400"></p>
-              <p class="text-xs text-slate-500">Fare</p>
-            </div>
+          <div style="display:flex;gap:20px;text-align:center;">
+            <div><p id="banner-dep" style="color:var(--accent);font-family:'Playfair Display',serif;font-size:20px;font-weight:700;"></p><p style="color:rgba(255,255,255,0.4);font-size:11px;">Dep.</p></div>
+            <div><p id="banner-arr" style="color:#93c5fd;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;"></p><p style="color:rgba(255,255,255,0.4);font-size:11px;">Arr.</p></div>
+            <div><p id="banner-fare" style="color:#4ade80;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;"></p><p style="color:rgba(255,255,255,0.4);font-size:11px;">Fare</p></div>
           </div>
         </div>
       </div>
 
-      <!-- Booking Form -->
-      <div class="card-glass rounded-2xl p-8 fade-up">
-        <h2 class="font-display font-bold text-xl mb-6">Passenger Details</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Train</label>
-            <select id="book-train" onchange="loadTrainInfo()" class="input-field rounded-xl px-4 py-3 text-sm">
-              <option value="">Select train...</option>
+      <!-- Form Card -->
+      <div class="card fade-up">
+        <div class="section-title">Journey Details</div>
+        <div class="form-grid">
+          <div class="form-full">
+            <label>Select Train</label>
+            <select id="book-train" onchange="onTrainSelect()" class="field">
+              <option value="">Choose a train...</option>
             </select>
           </div>
-          <div>
-            <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Journey Date</label>
-            <input id="book-date" type="date" class="input-field rounded-xl px-4 py-3 text-sm"/>
-          </div>
-          <div class="md:col-span-2">
-            <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Full Name</label>
-            <input id="pass-name" type="text" placeholder="e.g. Arjun Sharma" class="input-field rounded-xl px-4 py-3 text-sm"/>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Age</label>
-            <input id="pass-age" type="number" min="1" max="120" placeholder="25" class="input-field rounded-xl px-4 py-3 text-sm"/>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Gender</label>
-            <select id="pass-gender" class="input-field rounded-xl px-4 py-3 text-sm">
-              <option value="">Select...</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Email</label>
-            <input id="pass-email" type="email" placeholder="arjun@email.com" class="input-field rounded-xl px-4 py-3 text-sm"/>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Phone</label>
-            <input id="pass-phone" type="tel" placeholder="9876543210" class="input-field rounded-xl px-4 py-3 text-sm"/>
+          <div class="form-full">
+            <label>Journey Date</label>
+            <input id="book-date" type="date" class="field"/>
           </div>
         </div>
 
-        <div id="book-error" class="hidden mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"></div>
+        <div style="height:1px;background:var(--border);margin:0 20px;"></div>
+        <div class="section-title">Passenger Details</div>
+        <div class="form-grid">
+          <div class="form-full">
+            <label>Full Name</label>
+            <input id="pass-name" type="text" placeholder="e.g. Arjun Sharma" class="field"/>
+          </div>
+          <div>
+            <label>Age</label>
+            <input id="pass-age" type="number" min="1" max="120" placeholder="25" class="field"/>
+          </div>
+          <div>
+            <label>Gender</label>
+            <select id="pass-gender" class="field">
+              <option value="">Select...</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Email Address</label>
+            <input id="pass-email" type="email" placeholder="arjun@email.com" class="field"/>
+          </div>
+          <div>
+            <label>Phone Number</label>
+            <input id="pass-phone" type="tel" placeholder="9876543210" class="field"/>
+          </div>
+        </div>
 
-        <button onclick="bookTicket()" id="book-btn" class="btn-primary mt-6 w-full rounded-xl py-3.5 text-sm font-semibold text-white">
-          Confirm Booking →
-        </button>
+        <div id="book-error" class="error-box" style="display:none;"></div>
+
+        <div style="padding:0 20px 20px;">
+          <button id="book-btn" class="btn-confirm" onclick="bookTicket()">Confirm Booking →</button>
+        </div>
       </div>
     </div>
 
     <!-- PNR TAB -->
-    <div id="pane-pnr" class="hidden">
-      <div class="card-glass rounded-2xl p-8 fade-up mb-6">
-        <h2 class="font-display font-bold text-xl mb-6">Check PNR Status</h2>
-        <div class="flex gap-3">
-          <input id="pnr-input" type="text" placeholder="Enter 10-digit PNR number" maxlength="10" class="input-field rounded-xl px-4 py-3 text-sm flex-1"/>
-          <button onclick="checkPNR()" class="btn-primary px-6 rounded-xl text-sm font-semibold text-white whitespace-nowrap">Check</button>
+    <div id="pane-pnr" style="display:none;">
+      <div class="card fade-up" style="margin-bottom:20px;">
+        <div class="section-title">Enter PNR Number</div>
+        <div class="pnr-input-wrap">
+          <input id="pnr-input" type="text" placeholder="Enter 10-digit PNR" maxlength="10" class="field" style="flex:1;"/>
+          <button onclick="checkPNR()" style="background:var(--blue);color:white;border:none;border-radius:10px;padding:11px 24px;font-family:'Mulish',sans-serif;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;transition:all 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='var(--blue)'">Check Status</button>
         </div>
-        <div id="pnr-error" class="hidden mt-3 text-red-400 text-sm"></div>
+        <div id="pnr-error" style="display:none;color:#dc2626;font-size:13px;padding:0 20px 16px;"></div>
       </div>
-      <div id="pnr-result" class="hidden"></div>
+      <div id="pnr-result"></div>
     </div>
+  </div>
 
-    <!-- Booking Success Modal -->
-    <div id="success-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(8px)">
-      <div class="ticket-bg rounded-3xl p-8 max-w-lg w-full fade-up">
-        <div class="text-center mb-6">
-          <div class="text-5xl mb-3">🎫</div>
-          <h2 class="font-display text-2xl font-extrabold text-white">Booking Confirmed!</h2>
-          <p class="text-slate-400 text-sm mt-1">Your ticket has been booked successfully.</p>
-        </div>
-        <div class="space-y-3 text-sm">
-          <div class="flex justify-between py-2 border-b border-white/10">
-            <span class="text-slate-400">PNR Number</span>
-            <span id="s-pnr" class="font-display font-bold text-orange-400 text-lg"></span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-white/10">
-            <span class="text-slate-400">Train</span>
-            <span id="s-train" class="font-semibold text-white"></span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-white/10">
-            <span class="text-slate-400">Route</span>
-            <span id="s-route" class="font-semibold text-white"></span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-white/10">
-            <span class="text-slate-400">Journey Date</span>
-            <span id="s-date" class="font-semibold text-white"></span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-white/10">
-            <span class="text-slate-400">Seat Number</span>
-            <span id="s-seat" class="font-display font-bold text-green-400 text-lg"></span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-white/10">
-            <span class="text-slate-400">Passenger</span>
-            <span id="s-passenger" class="font-semibold text-white"></span>
-          </div>
-          <div class="flex justify-between py-2">
-            <span class="text-slate-400">Total Fare</span>
-            <span id="s-fare" class="font-display font-bold text-green-400 text-xl"></span>
+  <!-- Success Modal -->
+  <div id="modal" class="modal-overlay" style="display:none;">
+    <div class="ticket fade-up">
+      <div class="ticket-header">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <span style="font-size:28px;">🎫</span>
+          <div>
+            <p style="color:rgba(255,255,255,0.6);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Booking Confirmed</p>
+            <p class="font-display" style="color:white;font-size:20px;font-weight:700;">Your ticket is ready!</p>
           </div>
         </div>
-        <div class="flex gap-3 mt-6">
-          <button onclick="closeModal()" class="flex-1 py-3 rounded-xl border border-white/10 text-sm text-slate-300 hover:border-white/20 transition-all">Close</button>
-          <a href="/" class="btn-primary flex-1 py-3 rounded-xl text-sm font-semibold text-white text-center">Book Another</a>
+        <div style="background:rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="color:rgba(255,255,255,0.5);font-size:12px;font-weight:600;">PNR NUMBER</span>
+          <span class="pnr-badge" id="s-pnr"></span>
+        </div>
+      </div>
+      <div class="ticket-body">
+        <div class="ticket-row">
+          <span class="ticket-label">Train</span>
+          <span class="ticket-value" id="s-train"></span>
+        </div>
+        <div class="ticket-row">
+          <span class="ticket-label">Route</span>
+          <span class="ticket-value" id="s-route"></span>
+        </div>
+        <div class="ticket-row">
+          <span class="ticket-label">Journey Date</span>
+          <span class="ticket-value" id="s-date"></span>
+        </div>
+        <div class="ticket-row">
+          <span class="ticket-label">Seat Number</span>
+          <span class="ticket-value" style="font-size:18px;color:var(--blue);" id="s-seat"></span>
+        </div>
+        <div class="ticket-row">
+          <span class="ticket-label">Passenger</span>
+          <span class="ticket-value" id="s-passenger"></span>
+        </div>
+        <div class="ticket-row" style="border-bottom:none;">
+          <span class="ticket-label">Total Fare</span>
+          <span style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#16a34a;" id="s-fare"></span>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button onclick="closeModal()" style="flex:1;padding:11px;border-radius:9px;border:1.5px solid var(--border);background:white;font-family:'Mulish',sans-serif;font-weight:600;font-size:14px;cursor:pointer;color:var(--muted);">Close</button>
+          <a href="/" style="flex:1;padding:11px;border-radius:9px;background:var(--navy);color:white;font-family:'Mulish',sans-serif;font-weight:700;font-size:14px;text-align:center;text-decoration:none;display:block;">Book Another</a>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    const API = 'https://railway-management-system-kmog.onrender.com';
+<script>
+  const API = 'http://localhost:5000';
+  document.getElementById('book-date').valueAsDate = new Date();
 
-    document.getElementById('book-date').valueAsDate = new Date();
+  function showTab(tab) {
+    document.getElementById('pane-book').style.display = tab === 'book' ? 'block' : 'none';
+    document.getElementById('pane-pnr').style.display = tab === 'pnr' ? 'block' : 'none';
+    document.getElementById('tab-book').className = `tab ${tab === 'book' ? 'active' : ''}`;
+    document.getElementById('tab-pnr').className = `tab ${tab === 'pnr' ? 'active' : ''}`;
+  }
 
-    function showTab(tab) {
-      document.getElementById('pane-book').classList.toggle('hidden', tab !== 'book');
-      document.getElementById('pane-pnr').classList.toggle('hidden', tab !== 'pnr');
-      document.getElementById('tab-book').className = `px-6 py-3 text-sm font-semibold transition-all ${tab === 'book' ? 'tab-active' : 'tab-inactive'}`;
-      document.getElementById('tab-pnr').className = `px-6 py-3 text-sm font-semibold transition-all ${tab === 'pnr' ? 'tab-active' : 'tab-inactive'}`;
-    }
-
-    async function loadTrains() {
-      try {
-        const res = await fetch(`${API}/api/trains`);
-        const data = await res.json();
-        const sel = document.getElementById('book-train');
-        data.trains.forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t.id;
-          opt.dataset.name = t.train_name;
-          opt.dataset.number = t.train_number;
-          opt.dataset.source = t.source;
-          opt.dataset.dest = t.destination;
-          opt.dataset.depart = t.departure_time;
-          opt.dataset.arrive = t.arrival_time;
-          opt.dataset.fare = t.fare;
-          opt.textContent = `${t.train_number} — ${t.train_name} (${t.source} → ${t.destination})`;
-          sel.appendChild(opt);
-        });
-        // URL params
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('train_id')) {
-          sel.value = params.get('train_id');
-          loadTrainInfo();
-        }
-        if (params.get('date')) {
-          document.getElementById('book-date').value = params.get('date');
-        }
-      } catch(e) {}
-    }
-
-    function loadTrainInfo() {
+  async function loadTrains() {
+    try {
+      const res = await fetch(`${API}/api/trains`);
+      const data = await res.json();
       const sel = document.getElementById('book-train');
-      const opt = sel.options[sel.selectedIndex];
-      if (!opt.value) { document.getElementById('train-info-card').classList.add('hidden'); return; }
-      document.getElementById('card-train-name').textContent = `${opt.dataset.number} · ${opt.dataset.name}`;
-      document.getElementById('card-route').textContent = `${opt.dataset.source} → ${opt.dataset.dest}`;
-      document.getElementById('card-depart').textContent = opt.dataset.depart;
-      document.getElementById('card-arrive').textContent = opt.dataset.arrive;
-      document.getElementById('card-fare').textContent = `₹${opt.dataset.fare}`;
-      document.getElementById('train-info-card').classList.remove('hidden');
+      data.trains.forEach(t => {
+        const o = document.createElement('option');
+        o.value = t.id;
+        o.dataset.name = t.train_name; o.dataset.number = t.train_number;
+        o.dataset.source = t.source; o.dataset.dest = t.destination;
+        o.dataset.dep = t.departure_time; o.dataset.arr = t.arrival_time;
+        o.dataset.fare = t.fare;
+        o.textContent = `${t.train_number} — ${t.train_name} (${t.source} → ${t.destination})`;
+        sel.appendChild(o);
+      });
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('train_id')) { sel.value = p.get('train_id'); onTrainSelect(); }
+      if (p.get('date')) document.getElementById('book-date').value = p.get('date');
+    } catch(e) {}
+  }
+
+  function onTrainSelect() {
+    const sel = document.getElementById('book-train');
+    const o = sel.options[sel.selectedIndex];
+    if (!o.value) { document.getElementById('train-banner').style.display = 'none'; return; }
+    document.getElementById('banner-name').textContent = `${o.dataset.number} · ${o.dataset.name}`;
+    document.getElementById('banner-route').textContent = `${o.dataset.source} → ${o.dataset.dest}`;
+    document.getElementById('banner-dep').textContent = o.dataset.dep;
+    document.getElementById('banner-arr').textContent = o.dataset.arr;
+    document.getElementById('banner-fare').textContent = `₹${o.dataset.fare}`;
+    document.getElementById('train-banner').style.display = 'block';
+  }
+
+  async function bookTicket() {
+    const err = document.getElementById('book-error');
+    err.style.display = 'none';
+    const trainId = document.getElementById('book-train').value;
+    const date = document.getElementById('book-date').value;
+    const name = document.getElementById('pass-name').value.trim();
+    const age = document.getElementById('pass-age').value;
+    const gender = document.getElementById('pass-gender').value;
+    const email = document.getElementById('pass-email').value.trim();
+    const phone = document.getElementById('pass-phone').value.trim();
+    if (!trainId || !date || !name || !age || !gender || !email || !phone) {
+      err.textContent = 'Please fill in all fields before confirming.';
+      err.style.display = 'block'; return;
     }
-
-    async function bookTicket() {
-      const errEl = document.getElementById('book-error');
-      errEl.classList.add('hidden');
-
-      const trainId = document.getElementById('book-train').value;
-      const date = document.getElementById('book-date').value;
-      const name = document.getElementById('pass-name').value.trim();
-      const age = document.getElementById('pass-age').value;
-      const gender = document.getElementById('pass-gender').value;
-      const email = document.getElementById('pass-email').value.trim();
-      const phone = document.getElementById('pass-phone').value.trim();
-
-      if (!trainId || !date || !name || !age || !gender || !email || !phone) {
-        errEl.textContent = 'Please fill in all fields.';
-        errEl.classList.remove('hidden');
-        return;
-      }
-
-      const btn = document.getElementById('book-btn');
-      btn.innerHTML = '<span class="loader"></span>';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(`${API}/api/book`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            train_id: parseInt(trainId),
-            journey_date: date,
-            passenger_name: name,
-            passenger_age: parseInt(age),
-            passenger_gender: gender,
-            passenger_email: email,
-            passenger_phone: phone
-          })
-        });
-
-        const data = await res.json();
-        btn.innerHTML = 'Confirm Booking →';
-        btn.disabled = false;
-
-        if (!res.ok) {
-          errEl.textContent = data.error || 'Booking failed.';
-          errEl.classList.remove('hidden');
-          return;
-        }
-
-        // Show success
-        document.getElementById('s-pnr').textContent = data.pnr;
-        document.getElementById('s-train').textContent = `${data.train_number} · ${data.train_name}`;
-        document.getElementById('s-route').textContent = `${data.source} → ${data.destination}`;
-        document.getElementById('s-date').textContent = data.journey_date;
-        document.getElementById('s-seat').textContent = data.seat_number;
-        document.getElementById('s-passenger').textContent = data.passenger_name;
-        document.getElementById('s-fare').textContent = `₹${data.fare}`;
-        document.getElementById('success-modal').classList.remove('hidden');
-
-      } catch(e) {
-        btn.innerHTML = 'Confirm Booking →';
-        btn.disabled = false;
-        errEl.textContent = 'Could not connect to server.';
-        errEl.classList.remove('hidden');
-      }
+    const btn = document.getElementById('book-btn');
+    btn.innerHTML = '<span class="loader"></span> Confirming...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/api/book`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ train_id:parseInt(trainId), journey_date:date, passenger_name:name, passenger_age:parseInt(age), passenger_gender:gender, passenger_email:email, passenger_phone:phone })
+      });
+      const data = await res.json();
+      btn.innerHTML = 'Confirm Booking →'; btn.disabled = false;
+      if (!res.ok) { err.textContent = data.error || 'Booking failed.'; err.style.display = 'block'; return; }
+      document.getElementById('s-pnr').textContent = data.pnr;
+      document.getElementById('s-train').textContent = `${data.train_number} · ${data.train_name}`;
+      document.getElementById('s-route').textContent = `${data.source} → ${data.destination}`;
+      document.getElementById('s-date').textContent = data.journey_date;
+      document.getElementById('s-seat').textContent = data.seat_number;
+      document.getElementById('s-passenger').textContent = data.passenger_name;
+      document.getElementById('s-fare').textContent = `₹${data.fare}`;
+      document.getElementById('modal').style.display = 'flex';
+    } catch(e) {
+      btn.innerHTML = 'Confirm Booking →'; btn.disabled = false;
+      err.textContent = 'Could not connect to server.'; err.style.display = 'block';
     }
+  }
 
-    function closeModal() {
-      document.getElementById('success-modal').classList.add('hidden');
-    }
+  function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
-    async function checkPNR() {
-      const pnr = document.getElementById('pnr-input').value.trim();
-      const errEl = document.getElementById('pnr-error');
-      errEl.classList.add('hidden');
-
-      if (pnr.length !== 10) {
-        errEl.textContent = 'PNR must be exactly 10 digits.';
-        errEl.classList.remove('hidden');
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API}/api/bookings/${pnr}`);
-        const data = await res.json();
-        const resultEl = document.getElementById('pnr-result');
-
-        if (!res.ok) {
-          errEl.textContent = data.error || 'Booking not found.';
-          errEl.classList.remove('hidden');
-          resultEl.classList.add('hidden');
-          return;
-        }
-
-        const statusColor = data.status === 'CONFIRMED' ? 'text-green-400' : 'text-red-400';
-        resultEl.innerHTML = `
-          <div class="ticket-bg rounded-2xl p-7 fade-up">
-            <div class="flex items-start justify-between mb-5">
-              <div>
-                <p class="font-display font-bold text-2xl text-white">${data.train_number} · ${data.train_name}</p>
-                <p class="text-slate-400 text-sm mt-1">${data.source} → ${data.destination}</p>
-              </div>
-              <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3)">${data.status}</span>
+  async function checkPNR() {
+    const pnr = document.getElementById('pnr-input').value.trim();
+    const errEl = document.getElementById('pnr-error');
+    errEl.style.display = 'none';
+    if (pnr.length !== 10) { errEl.textContent = 'PNR must be exactly 10 digits.'; errEl.style.display = 'block'; return; }
+    try {
+      const res = await fetch(`${API}/api/bookings/${pnr}`);
+      const d = await res.json();
+      const r = document.getElementById('pnr-result');
+      if (!res.ok) { errEl.textContent = d.error || 'Booking not found.'; errEl.style.display = 'block'; r.innerHTML = ''; return; }
+      r.innerHTML = `
+        <div class="card fade-up" style="overflow:hidden;">
+          <div style="background:var(--navy);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div>
+              <p style="color:white;font-weight:700;font-size:16px;">${d.train_number} · ${d.train_name}</p>
+              <p style="color:rgba(255,255,255,0.45);font-size:13px;margin-top:3px;">${d.source} → ${d.destination}</p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              <div><p class="text-slate-500 text-xs mb-1">PNR</p><p class="font-display font-bold text-orange-400">${data.pnr}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Journey Date</p><p class="font-semibold">${data.journey_date}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Seat</p><p class="font-display font-bold text-green-400 text-lg">${data.seat_number}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Passenger</p><p class="font-semibold">${data.passenger_name}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Age / Gender</p><p class="font-semibold">${data.age} / ${data.gender}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Total Fare</p><p class="font-display font-bold text-green-400">₹${data.total_fare}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Departure</p><p class="font-semibold">${data.departure_time}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Arrival</p><p class="font-semibold">${data.arrival_time}</p></div>
-              <div><p class="text-slate-500 text-xs mb-1">Booked On</p><p class="font-semibold">${data.booking_date}</p></div>
+            <div style="background:${d.status==='CONFIRMED'?'rgba(74,222,128,0.15)':'rgba(248,113,113,0.15)'};border:1px solid ${d.status==='CONFIRMED'?'rgba(74,222,128,0.4)':'rgba(248,113,113,0.4)'};padding:6px 16px;border-radius:20px;">
+              <span style="color:${d.status==='CONFIRMED'?'#4ade80':'#f87171'};font-weight:700;font-size:13px;">${d.status}</span>
             </div>
           </div>
-        `;
-        resultEl.classList.remove('hidden');
-      } catch(e) {
-        document.getElementById('pnr-error').textContent = 'Could not connect to server.';
-        document.getElementById('pnr-error').classList.remove('hidden');
-      }
-    }
+          <div style="padding:20px 24px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">PNR</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--accent);">${d.pnr}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Seat</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--blue);">${d.seat_number}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Fare</p><p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#16a34a;">₹${d.total_fare}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Passenger</p><p style="font-weight:700;font-size:14px;">${d.passenger_name}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Age / Gender</p><p style="font-weight:700;font-size:14px;">${d.age} / ${d.gender}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Journey Date</p><p style="font-weight:700;font-size:14px;">${d.journey_date}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Departure</p><p style="font-weight:700;font-size:14px;">${d.departure_time}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Arrival</p><p style="font-weight:700;font-size:14px;">${d.arrival_time}</p></div>
+              <div><p style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Booked On</p><p style="font-weight:700;font-size:14px;">${d.booking_date}</p></div>
+            </div>
+          </div>
+        </div>`;
+    } catch(e) { document.getElementById('pnr-error').textContent = 'Could not connect to server.'; document.getElementById('pnr-error').style.display = 'block'; }
+  }
 
-    loadTrains();
-  </script>
+  loadTrains();
+</script>
 </body>
 </html>
