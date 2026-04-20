@@ -1,222 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Seat Availability — RailYatra</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #e2e8f0; }
-    h1,h2,h3,.font-display { font-family: 'Syne', sans-serif; }
-    .card-glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px); }
-    .input-field { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #e2e8f0; transition: all 0.2s; }
-    .input-field:focus { outline: none; border-color: #f97316; background: rgba(249,115,22,0.08); box-shadow: 0 0 0 3px rgba(249,115,22,0.15); }
-    .input-field::placeholder { color: rgba(255,255,255,0.3); }
-    .btn-primary { background: linear-gradient(135deg, #ea580c, #f97316); transition: all 0.2s; box-shadow: 0 4px 20px rgba(249,115,22,0.3); }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(249,115,22,0.45); }
-    .nav-link { transition: color 0.2s; }
-    .nav-link:hover { color: #f97316; }
-    .seat-avail {
-      background: rgba(34,197,94,0.12);
-      border: 1px solid rgba(34,197,94,0.35);
-      color: #4ade80;
-      transition: all 0.15s;
-      cursor: default;
-    }
-    .seat-booked {
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.25);
-      color: rgba(239,68,68,0.5);
-    }
-    .loader { width: 36px; height: 36px; border: 3px solid rgba(249,115,22,0.2); border-top-color: #f97316; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
-    .fade-up { animation: fadeUp 0.4s ease forwards; }
+    :root { --navy:#1a2744; --blue:#2563eb; --accent:#f59e0b; --light:#f8f9fc; --border:#e2e8f0; --text:#1e293b; --muted:#64748b; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Mulish',sans-serif; background:var(--light); color:var(--text); }
+    .font-display { font-family:'Playfair Display',serif; }
+    nav { background:var(--navy); }
+    .nav-link { color:rgba(255,255,255,0.7); transition:color 0.2s; font-size:14px; text-decoration:none; }
+    .nav-link:hover,.nav-link.active { color:var(--accent); }
+    .card { background:white; border:1.5px solid var(--border); border-radius:14px; padding:24px; }
+    label { font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:6px; }
+    .field { width:100%; border:1.5px solid var(--border); border-radius:10px; padding:11px 14px; font-family:'Mulish',sans-serif; font-size:14px; color:var(--text); background:#fafbfc; transition:all 0.2s; outline:none; }
+    .field:focus { border-color:var(--blue); background:white; box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+    .btn-primary { background:var(--blue); color:white; border:none; border-radius:10px; padding:12px 24px; font-family:'Mulish',sans-serif; font-weight:700; font-size:14px; cursor:pointer; width:100%; transition:all 0.2s; }
+    .btn-primary:hover { background:#1d4ed8; transform:translateY(-1px); box-shadow:0 4px 16px rgba(37,99,235,0.3); }
+    .seat-avail { background:#f0fdf4; border:1.5px solid #86efac; color:#16a34a; border-radius:8px; padding:8px 4px; text-align:center; font-size:11px; font-weight:700; transition:all 0.15s; }
+    .seat-avail:hover { background:#dcfce7; transform:scale(1.05); }
+    .seat-booked { background:#fef2f2; border:1.5px solid #fca5a5; color:#dc2626; border-radius:8px; padding:8px 4px; text-align:center; font-size:11px; font-weight:600; opacity:0.7; }
+    .stat-box { background:white; border:1.5px solid var(--border); border-radius:12px; padding:16px 20px; text-align:center; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; }
+    .loader { width:32px; height:32px; border:3px solid #e2e8f0; border-top-color:var(--blue); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation:fadeUp 0.35s ease forwards; }
+    .page-header { background:var(--navy); padding:32px 24px 32px; }
   </style>
 </head>
-<body class="min-h-screen" style="background: radial-gradient(ellipse at 70% 10%, #1a3a6e33 0%, transparent 55%), #0a0f1e;">
-
-  <nav class="border-b border-white/5 sticky top-0 z-50" style="background:rgba(10,15,30,0.85);backdrop-filter:blur(20px)">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <a href="/" class="flex items-center gap-2">
-          <span class="text-2xl">🚆</span>
-          <span class="font-display font-800 text-xl tracking-tight">Rail<span class="text-orange-400">Yatra</span></span>
-        </a>
-      </div>
-      <div class="flex items-center gap-8 text-sm text-slate-400">
-        <a href="/" class="nav-link">Search Trains</a>
-        <a href="/seat-availability" class="nav-link text-orange-400 font-medium">Seat Availability</a>
-        <a href="/booking" class="nav-link">My Booking</a>
+<body>
+  <nav>
+    <div style="max-width:1100px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;">
+      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <span style="font-size:22px;">🚆</span>
+        <span class="font-display" style="color:white;font-size:20px;font-weight:700;">Rail<span style="color:var(--accent)">Yatra</span></span>
+      </a>
+      <div style="display:flex;gap:28px;align-items:center;">
+        <a href="/" class="nav-link">Search</a>
+        <a href="/seat-availability" class="nav-link active">Seat Map</a>
+        <a href="/booking" class="nav-link">Booking</a>
+        <a href="/booking" style="background:var(--accent);color:var(--navy);padding:7px 18px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">Check PNR</a>
       </div>
     </div>
   </nav>
 
-  <div class="max-w-5xl mx-auto px-6 pt-12 pb-16">
-    <h1 class="font-display text-4xl font-extrabold mb-2">Seat <span class="text-orange-400">Availability</span></h1>
-    <p class="text-slate-400 mb-8">Check real-time seat availability for any train.</p>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div style="max-width:1100px;margin:0 auto;">
+      <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:6px;">← <a href="/" style="color:rgba(255,255,255,0.5);text-decoration:none;">Back to Search</a></p>
+      <h1 class="font-display" style="color:white;font-size:32px;">Seat Availability</h1>
+      <p style="color:rgba(255,255,255,0.5);font-size:14px;margin-top:6px;">Check real-time coach-wise seat map for any train</p>
+    </div>
+  </div>
+
+  <div style="max-width:1100px;margin:0 auto;padding:32px 24px 60px;">
 
     <!-- Controls -->
-    <div class="card-glass rounded-2xl p-6 mb-8 fade-up">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="card fade-up" style="margin-bottom:24px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:16px;align-items:end;">
         <div>
-          <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Train</label>
-          <select id="train-select" class="input-field w-full rounded-xl px-4 py-3 text-sm">
-            <option value="">Select a train...</option>
+          <label>Select Train</label>
+          <select id="train-select" onchange="onTrainChange()" class="field">
+            <option value="">Choose a train...</option>
           </select>
         </div>
         <div>
-          <label class="text-xs text-slate-400 uppercase tracking-widest mb-2 block">Journey Date</label>
-          <input id="journey-date" type="date" class="input-field w-full rounded-xl px-4 py-3 text-sm"/>
+          <label>Journey Date</label>
+          <input id="journey-date" type="date" class="field"/>
         </div>
-        <div class="flex items-end">
-          <button onclick="loadSeats()" class="btn-primary w-full rounded-xl py-3 text-sm font-semibold text-white">Check Availability</button>
+        <div>
+          <button class="btn-primary" onclick="loadSeats()" style="white-space:nowrap;">Check Seats</button>
         </div>
       </div>
     </div>
 
-    <!-- Train Info Bar -->
-    <div id="train-info" class="hidden card-glass rounded-2xl p-5 mb-6 fade-up">
-      <div class="flex flex-wrap gap-6 items-center">
+    <!-- Train Quick Info -->
+    <div id="train-info" style="display:none;margin-bottom:24px;" class="fade-up">
+      <div style="background:var(--navy);border-radius:14px;padding:20px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
         <div>
-          <p class="text-xs text-slate-500 mb-1">Train</p>
-          <p id="info-train" class="font-display font-bold text-lg text-white"></p>
+          <p id="info-name" style="color:white;font-weight:700;font-size:17px;"></p>
+          <p id="info-route" style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:3px;"></p>
         </div>
-        <div>
-          <p class="text-xs text-slate-500 mb-1">Route</p>
-          <p id="info-route" class="font-semibold text-slate-200"></p>
-        </div>
-        <div class="ml-auto flex gap-6 text-center">
-          <div>
-            <p id="info-avail" class="font-display font-bold text-2xl text-green-400"></p>
-            <p class="text-xs text-slate-500">Available</p>
+        <div style="display:flex;gap:20px;">
+          <div style="text-align:center;">
+            <p id="info-avail" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#4ade80;"></p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">Available</p>
           </div>
-          <div>
-            <p id="info-booked" class="font-display font-bold text-2xl text-red-400"></p>
-            <p class="text-xs text-slate-500">Booked</p>
+          <div style="text-align:center;">
+            <p id="info-booked" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#f87171;"></p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">Booked</p>
           </div>
-          <div>
-            <p id="info-total" class="font-display font-bold text-2xl text-slate-300"></p>
-            <p class="text-xs text-slate-500">Total</p>
+          <div style="text-align:center;">
+            <p id="info-total" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:rgba(255,255,255,0.8);"></p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">Total</p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Legend -->
-    <div id="legend" class="hidden flex items-center gap-6 mb-6 text-sm">
-      <div class="flex items-center gap-2">
-        <div class="w-6 h-6 rounded seat-avail flex items-center justify-center text-xs">✓</div>
-        <span class="text-slate-400">Available</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="w-6 h-6 rounded seat-booked flex items-center justify-center text-xs">✕</div>
-        <span class="text-slate-400">Booked</span>
+    <div id="legend" style="display:none;margin-bottom:20px;display:none;">
+      <div style="display:flex;align-items:center;gap:20px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="seat-avail" style="width:36px;padding:5px;">A1</div>
+          <span style="font-size:13px;color:var(--muted);">Available</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="seat-booked" style="width:36px;padding:5px;">B2</div>
+          <span style="font-size:13px;color:var(--muted);">Booked</span>
+        </div>
       </div>
     </div>
 
     <!-- Loader -->
-    <div id="loader" class="hidden py-16 text-center">
-      <div class="loader mb-4"></div>
-      <p class="text-slate-500 text-sm">Loading seat map...</p>
+    <div id="loader" style="display:none;padding:60px;text-align:center;">
+      <div class="loader" style="margin-bottom:14px;"></div>
+      <p style="color:var(--muted);font-size:13px;">Loading seat map...</p>
     </div>
 
     <!-- Seat Map -->
-    <div id="seat-map" class="hidden fade-up"></div>
+    <div id="seat-map" style="display:none;" class="fade-up"></div>
   </div>
 
-  <script>
-    const API = 'https://railway-management-system-kmog.onrender.com';
-    let allTrains = [];
+<script>
+  const API = 'http://localhost:5000';
+  document.getElementById('journey-date').valueAsDate = new Date();
 
-    document.getElementById('journey-date').valueAsDate = new Date();
+  async function loadTrains() {
+    try {
+      const res = await fetch(`${API}/api/trains`);
+      const data = await res.json();
+      const sel = document.getElementById('train-select');
+      data.trains.forEach(t => {
+        const o = document.createElement('option');
+        o.value = t.id;
+        o.textContent = `${t.train_number} — ${t.train_name} (${t.source} → ${t.destination})`;
+        sel.appendChild(o);
+      });
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('train_id')) { sel.value = params.get('train_id'); loadSeats(); }
+    } catch(e) {}
+  }
 
-    async function loadTrains() {
-      try {
-        const res = await fetch(`${API}/api/trains`);
-        const data = await res.json();
-        allTrains = data.trains;
-        const sel = document.getElementById('train-select');
-        data.trains.forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t.id;
-          opt.textContent = `${t.train_number} — ${t.train_name} (${t.source} → ${t.destination})`;
-          sel.appendChild(opt);
-        });
-        // Auto-select from URL params
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('train_id')) {
-          sel.value = params.get('train_id');
-          loadSeats();
-        }
-      } catch(e) {}
-    }
+  function onTrainChange() {}
 
-    async function loadSeats() {
-      const trainId = document.getElementById('train-select').value;
-      const date = document.getElementById('journey-date').value;
-      if (!trainId) { alert('Please select a train'); return; }
+  async function loadSeats() {
+    const trainId = document.getElementById('train-select').value;
+    const date = document.getElementById('journey-date').value;
+    if (!trainId) { alert('Please select a train'); return; }
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('seat-map').style.display = 'none';
+    document.getElementById('train-info').style.display = 'none';
+    document.getElementById('legend').style.display = 'none';
+    try {
+      const res = await fetch(`${API}/api/seats/${trainId}?date=${date}`);
+      const data = await res.json();
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('info-name').textContent = `${data.train.train_number} · ${data.train.train_name}`;
+      document.getElementById('info-route').textContent = `${data.train.source} → ${data.train.destination} · Departs ${data.train.departure_time} · Arrives ${data.train.arrival_time}`;
+      document.getElementById('info-avail').textContent = data.available_seats;
+      document.getElementById('info-booked').textContent = data.booked_seats;
+      document.getElementById('info-total').textContent = data.total_seats;
+      document.getElementById('train-info').style.display = 'block';
+      document.getElementById('legend').style.display = 'flex';
 
-      document.getElementById('loader').classList.remove('hidden');
-      document.getElementById('seat-map').classList.add('hidden');
-      document.getElementById('train-info').classList.add('hidden');
-      document.getElementById('legend').classList.add('hidden');
+      const mapEl = document.getElementById('seat-map');
+      mapEl.innerHTML = '';
 
-      try {
-        const res = await fetch(`${API}/api/seats/${trainId}?date=${date}`);
-        const data = await res.json();
-        document.getElementById('loader').classList.add('hidden');
+      data.coaches.forEach(coach => {
+        const section = document.createElement('div');
+        section.className = 'card fade-up';
+        section.style.marginBottom = '16px';
 
-        // Fill info bar
-        document.getElementById('info-train').textContent = `${data.train.train_number} · ${data.train.train_name}`;
-        document.getElementById('info-route').textContent = `${data.train.source} → ${data.train.destination}`;
-        document.getElementById('info-avail').textContent = data.available_seats;
-        document.getElementById('info-booked').textContent = data.booked_seats;
-        document.getElementById('info-total').textContent = data.total_seats;
-        document.getElementById('train-info').classList.remove('hidden');
-        document.getElementById('legend').classList.remove('hidden');
-
-        // Build seat map
-        const mapEl = document.getElementById('seat-map');
-        mapEl.innerHTML = '';
-        data.coaches.forEach(coach => {
-          const section = document.createElement('div');
-          section.className = 'card-glass rounded-2xl p-6 mb-6';
-          section.innerHTML = `
-            <h3 class="font-display font-bold text-lg mb-4 text-orange-300">Coach ${coach.coach}</h3>
-            <div class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));">
-              ${coach.seats.map(s => `
-                <div class="rounded-lg py-2 text-center text-xs font-semibold ${s.available ? 'seat-avail' : 'seat-booked'}">
-                  ${s.id}
-                </div>
-              `).join('')}
+        const avail = coach.seats.filter(s => s.available).length;
+        section.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="background:var(--navy);color:white;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">${coach.coach}</div>
+              <div>
+                <p style="font-weight:700;font-size:15px;">Coach ${coach.coach}</p>
+                <p style="font-size:12px;color:var(--muted);">${avail} of ${coach.seats.length} seats available</p>
+              </div>
             </div>
-          `;
-          mapEl.appendChild(section);
-        });
+            <div style="background:${avail > 0 ? '#f0fdf4' : '#fef2f2'};color:${avail > 0 ? '#16a34a' : '#dc2626'};border:1px solid ${avail > 0 ? '#bbf7d0' : '#fecaca'};padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;">
+              ${avail > 0 ? avail + ' Free' : 'Full'}
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px;">
+            ${coach.seats.map(s => `
+              <div class="${s.available ? 'seat-avail' : 'seat-booked'}">${s.id}</div>
+            `).join('')}
+          </div>
+        `;
+        mapEl.appendChild(section);
+      });
 
-        mapEl.classList.remove('hidden');
-
-        // Book now button
-        const bookBtn = document.createElement('div');
-        bookBtn.className = 'text-center mt-6';
-        if (data.available_seats > 0) {
-          bookBtn.innerHTML = `<a href="/booking?train_id=${trainId}&date=${date}" class="btn-primary inline-block px-10 py-3 rounded-xl text-sm font-semibold text-white">Book a Seat →</a>`;
-        } else {
-          bookBtn.innerHTML = `<p class="text-red-400 font-semibold text-lg">No seats available for this date.</p>`;
-        }
-        mapEl.appendChild(bookBtn);
-
-      } catch(e) {
-        document.getElementById('loader').classList.add('hidden');
-        document.getElementById('seat-map').innerHTML = '<p class="text-red-400 text-center py-8">Error loading seat map.</p>';
-        document.getElementById('seat-map').classList.remove('hidden');
+      if (data.available_seats > 0) {
+        const bookDiv = document.createElement('div');
+        bookDiv.style.textAlign = 'center';
+        bookDiv.style.marginTop = '24px';
+        bookDiv.innerHTML = `
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">${data.available_seats} seats available for ${date}</p>
+          <a href="/booking?train_id=${trainId}&date=${date}" style="background:var(--accent);color:var(--navy);padding:12px 32px;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none;display:inline-block;">Book a Seat →</a>
+        `;
+        mapEl.appendChild(bookDiv);
+      } else {
+        const fullDiv = document.createElement('div');
+        fullDiv.style.cssText = 'text-align:center;padding:24px;background:#fef2f2;border-radius:12px;margin-top:16px;';
+        fullDiv.innerHTML = `<p style="color:#dc2626;font-weight:700;">No seats available for this date.</p>`;
+        mapEl.appendChild(fullDiv);
       }
-    }
 
-    loadTrains();
-  </script>
+      mapEl.style.display = 'block';
+    } catch(e) {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('seat-map').innerHTML = '<p style="color:#dc2626;text-align:center;padding:32px;">Error loading seat map.</p>';
+      document.getElementById('seat-map').style.display = 'block';
+    }
+  }
+
+  loadTrains();
+</script>
 </body>
 </html>
